@@ -1,25 +1,26 @@
 package ingest
 
 import (
-	"log"
 	"sync"
 
 	"github.com/v-venes/backend-challenge/internal/domain"
+	"github.com/v-venes/backend-challenge/internal/repository"
 )
 
-type BatchWorker struct{}
+type BatchWorker struct {
+	repo repository.StockRepository
+}
 
-func NewBatchWorker() *BatchWorker {
-	//TODO: Passar o repo
-	return &BatchWorker{}
+func NewBatchWorker(repo repository.StockRepository) *BatchWorker {
+	return &BatchWorker{
+		repo: repo,
+	}
 }
 
 func (b *BatchWorker) Run(wg *sync.WaitGroup, batchesCh <-chan []domain.Stock) {
 	defer wg.Done()
 
 	for batch := range batchesCh {
-		log.Println("Saving Batch", len(batch))
-
+		b.repo.UpsertBatch(batch)
 	}
-
 }

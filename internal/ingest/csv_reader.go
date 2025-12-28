@@ -3,6 +3,7 @@ package ingest
 import (
 	"encoding/csv"
 	"io"
+	"log"
 	"strings"
 
 	"github.com/v-venes/backend-challenge/internal/domain"
@@ -32,12 +33,16 @@ func (r *CSVReader) Read(reader io.Reader, stocksCh chan<- domain.Stock) error {
 		index[strings.ToLower(header)] = i
 	}
 
+	line := 2
+
 	for {
 		record, err := csvReader.Read()
 		if err == io.EOF {
 			return nil
 		} else if err != nil {
-			return err
+			log.Printf("[ERROR] reading csv line=%d err=:%v", line, err)
+			line++
+			continue
 		}
 
 		values := map[string]string{
@@ -48,7 +53,19 @@ func (r *CSVReader) Read(reader io.Reader, stocksCh chan<- domain.Stock) error {
 			"horafechamento":      record[index["horafechamento"]],
 		}
 
-		stock := domain.StockFromStrArray(values)
-		stocksCh <- stock
+		stock, err := domain.StockFromStrArray(values)
+		if err != nil {
+			log.Printf(
+				"[WARN] invalid record line=%d record=%v err=%v",
+				line,
+				values,
+				err,
+			)
+			line++
+			continue
+		}
+
+		stocksCh <- *stock
+		line++
 	}
 }

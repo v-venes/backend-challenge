@@ -7,28 +7,34 @@ import (
 	"os"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/v-venes/backend-challenge/internal/domain"
+	"github.com/v-venes/backend-challenge/internal/repository"
 )
 
 type NewIngestServiceParams struct {
 	BatchSize int
 	Workers   int
+	Repo      repository.StockRepository
 }
 
 type IngestService struct {
 	batchSize int
 	workers   int
+	repo      repository.StockRepository
 }
 
 func NewIngestService(params NewIngestServiceParams) *IngestService {
 	return &IngestService{
 		batchSize: params.BatchSize,
 		workers:   params.Workers,
+		repo:      params.Repo,
 	}
 }
 
 func (s *IngestService) Run(path string) error {
+	start := time.Now()
 	stocksCh := make(chan domain.Stock)
 	batchesCh := make(chan []domain.Stock)
 
@@ -39,7 +45,7 @@ func (s *IngestService) Run(path string) error {
 
 	var wg sync.WaitGroup
 	for i := 0; i < s.workers; i++ {
-		worker := NewBatchWorker()
+		worker := NewBatchWorker(s.repo)
 		wg.Add(1)
 		go worker.Run(&wg, batchesCh)
 	}
@@ -51,6 +57,9 @@ func (s *IngestService) Run(path string) error {
 
 	close(stocksCh)
 	wg.Wait()
+
+	elapsed := time.Since(start)
+	log.Printf("[INFO] ingestion finished in %s", elapsed.String())
 	return nil
 }
 
@@ -66,7 +75,7 @@ func (s *IngestService) processFiles(path string, csvReader *CSVReader, stocksCh
 			continue
 		}
 
-		log.Printf("Reading file %s", filename)
+		log.Printf("[INFO] reading file %s", filename)
 
 		filepath := fmt.Sprintf("%s/%s", path, filename)
 		readCloser, err := zip.OpenReader(filepath)
@@ -75,7 +84,7 @@ func (s *IngestService) processFiles(path string, csvReader *CSVReader, stocksCh
 		}
 
 		for _, file := range readCloser.File {
-			log.Printf("Processing file %s inside zip", file.Name)
+			log.Printf("[INFO] processing file %s inside zip", file.Name)
 
 			fileReadCloser, err := file.Open()
 			if err != nil {
