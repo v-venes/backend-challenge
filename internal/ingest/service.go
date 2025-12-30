@@ -34,6 +34,7 @@ func NewIngestService(params NewIngestServiceParams) *IngestService {
 }
 
 func (s *IngestService) Run(path string) error {
+	log.Println("[INFO] starting ingestion")
 	start := time.Now()
 	stocksCh := make(chan domain.Stock)
 	batchesCh := make(chan []domain.Stock)

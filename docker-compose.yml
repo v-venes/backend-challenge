@@ -1,0 +1,49 @@
+services:
+  db:
+    image: postgres:13
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_INITDB_ARGS: --wal-segsize=64 # Aumentando tamando do WAL para melhorar performance em cargas iniciais
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    ports:
+      - "${POSTGRES_PORT}:5432"
+  
+  migrate:
+    build:
+      context: .
+      dockerfile: docker/migrate.Dockerfile
+    depends_on:
+      - db
+    env_file:
+      - .env
+    restart: "no"
+
+  ingest:
+    build:
+      context: .
+      dockerfile: docker/ingest.Dockerfile
+    depends_on:
+      - db
+    env_file:
+      - .env
+    volumes:
+      - ./data:/app/data
+    command: ["./ingest"]
+    restart: "no"
+
+  api:
+    build:
+      context: .
+      dockerfile: docker/api.Dockerfile
+    depends_on:
+      - db
+    env_file:
+      - .env
+    ports:
+      - "8080:8080"
+
+volumes:
+  db_data:
