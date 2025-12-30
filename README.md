@@ -1,9 +1,7 @@
 # Backend Challenge
 
 [![Tests](https://github.com/v-venes/backend-challenge/actions/workflows/tests.yml/badge.svg)](https://github.com/v-venes/backend-challenge/actions/workflows/tests.yml)
-[![Go Report Card](https://goreportcard.com/badge/github.com/v-venes/backend-challenge)](https://goreportcard.com/report/github.com/v-venes/backend-challenge)
 [![codecov](https://codecov.io/gh/v-venes/backend-challenge/branch/main/graph/badge.svg)](https://codecov.io/gh/v-venes/backend-challenge)
-[![Go Version](https://img.shields.io/github/go-mod/go-version/v-venes/backend-challenge)](https://go.dev/)
 [![License](https://img.shields.io/github/license/v-venes/backend-challenge)](LICENSE)
 
 **Table of Contents**
