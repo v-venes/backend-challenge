@@ -16,6 +16,7 @@
   - [Como rodar o projeto](#como-rodar-o-projeto)
     - [Pré requisitos](#pré-requisitos)
     - [Rodando o projeto](#rodando-o-projeto)
+  - [Pontos para melhoria](#pontos-para-melhoria)
 
 ## Descrição
 
@@ -120,3 +121,15 @@ ou sem o parâmetro `data_inicio`:
 curl --request GET \
   --url 'http://localhost:8080/stocks/aggregate?ticker=PETR4'
 ```
+
+## Pontos para melhoria
+Aqui são alguns pontos que foram surgindo enquanto eu desenvolvia e testava
+
+### 1. 🚀 Processamento paralelo de arquivos
+Atualmente estou lendo um arquivo por vez, o consumo de memória está baixo e o tempo de ingestão não está tão alto, mas fiquei pensando se processamento paralelamente os arquivos o tempo de ingestão diminuiria, mas também precisaria ficar atento ao uso de memória.
+
+### 2. 🔄 Procurar outra forma de garantir idempotência
+Pensei no índice `idx_stocks_ticker_trade_at` para verificar os conflitos, porém isso prejudica a escrita.  
+
+### 3. 💾 Pensar em outra forma de salvar os dados para não precisar de duas colunas com o "mesmo valor"
+Vem de encontro com o ponto acima, eu utilizo a coluna `trade_at` para validar se um registro ja existe, mas isso me atrapalho na consulta, pois ou eu adicionava uma coluna nova só com a data (o que de fato ocorreu) ou eu precisaria usar o DATE() nas consultas que prejudicaria a performance.
