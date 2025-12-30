@@ -35,12 +35,9 @@ jobs:
       run: go mod download
     
     - name: Run tests
-      run: go test -v -race -coverprofile=coverage.out -covermode=atomic ./...
+      run: go test -v -race -coverprofile=coverage.txt -covermode=atomic ./...
     
-    - name: Upload coverage to Codecov
-      if: matrix.go-version == '1.22'
-      uses: codecov/codecov-action@v3
+    - name: Upload coverage reports to Codecov
+      uses: codecov/codecov-action@v5
       with:
-        files: ./coverage.out
-        flags: unittests
-        name: codecov-umbrella
+        token: ${{ secrets.CODECOV_TOKEN }}
